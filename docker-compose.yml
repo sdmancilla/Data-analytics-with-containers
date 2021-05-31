@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  db:
+    image: mysql
+    build: ./database
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    networks: 
+      - default
+
+  jupyter:
+    image: continuumio/anaconda3
+    command: jupyter notebook --port=8888 --no-browser --ip=0.0.0.0 --allow-root --NotebookApp.token='' --NotebookApp.password=''
+    container_name: jupyter
+    networks: 
+      - default
+    depends_on: 
+      - db
+    volumes: 
+      - ./jupyter-notebook:/jupyter-notebook
+    ports: 
+      - 8888:8888
+
+  dash:
+    build: ./dash
+    depends_on: 
+      - db
+    container_name: dash
+    networks: 
+      - default
+    ports:
+      - 8050:8050
+    restart: on-failure
+
+networks: 
+  default:
+    driver: bridge
